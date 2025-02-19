@@ -3,6 +3,7 @@
 import os
 import sys
 
+# git clone https://donghunhan:<PAT>@github.com/donghunhan/slack.git -> slack project git repo
 
 def main():
     """Run administrative tasks."""
