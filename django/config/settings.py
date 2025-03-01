@@ -26,11 +26,7 @@ SECRET_KEY = 'django-insecure-zhszsjmmei0b+q)fp=h)+1yi@vpt72r9(=1u7ld(&33vm%)p90
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-<<<<<<< HEAD
 ALLOWED_HOSTS = ['*', 'localhost', 'web', '127.0.0.1']
-=======
-ALLOWED_HOSTS = []
->>>>>>> 6f9f5a2558573375a13f6cb964d5c19b0b88ae4a
 
 
 # Application definition
@@ -42,10 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-<<<<<<< HEAD
     'aiweb',
-=======
->>>>>>> 6f9f5a2558573375a13f6cb964d5c19b0b88ae4a
 ]
 
 MIDDLEWARE = [
@@ -124,16 +117,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-<<<<<<< HEAD
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # 미디어 파일 설정
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-=======
-STATIC_URL = 'static/'
->>>>>>> 6f9f5a2558573375a13f6cb964d5c19b0b88ae4a
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
