@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLOv8 객체 감지</title>
+    <style>
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .loading {
+            display: none;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>YOLOv8 객체 감지</h1>
+    
+    <!-- 파일 업로드 폼 -->
+    <form id="upload-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="file-input">이미지 또는 비디오 파일을 선택하세요</label>
+            <input type="file" 
+                   id="file-input" 
+                   name="file" 
+                   accept="image/*,video/*" 
+                   required
+                   aria-label="파일 선택">
+        </div>
+        <button type="submit">업로드 및 분석</button>
+    </form>
+
+    <!-- 로딩 표시 -->
+    <div id="loading" class="loading">
+        분석 중입니다. 잠시만 기다려주세요...
+    </div>
+
+    <h2>분석 결과</h2>
+
+    <!-- 이미지 결과 -->
+    <img id="result-image" src="" alt="YOLOv8 분석 결과" style="display: none; max-width: 100%;">
+
+    <!-- 동영상 결과 -->
+    <div id="result-video" style="display: none;">
+        <video id="video-player" controls style="max-width: 100%;">
+            <source src="" type="video/mp4">
+            브라우저가 비디오 재생을 지원하지 않습니다.
+        </video>
+    </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const loading = document.getElementById('loading');
+        const resultImage = document.getElementById('result-image');
+        const resultVideo = document.getElementById('result-video');
+        const videoPlayer = document.getElementById('video-player');
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("파일을 선택하세요.");
+                return;
+            }
+
+            // 파일 크기 체크 (100MB 제한)
+            if (file.size > 100 * 1024 * 1024) {
+                alert("파일 크기는 100MB를 초과할 수 없습니다.");
+                return;
+            }
+
+            // 파일 형식 검증
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
+            if (!validTypes.includes(file.type)) {
+                alert("지원하지 않는 파일 형식입니다. (지원 형식: JPG, PNG, GIF, MP4, MOV)");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // UI 초기화
+            loading.style.display = 'block';
+            resultImage.style.display = 'none';
+            resultVideo.style.display = 'none';
+            
+            try {
+                const response = await fetch("{% url 'upload_file' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.result_image) {
+                    resultImage.src = "data:image/jpeg;base64," + data.result_image;
+                    resultImage.style.display = "block";
+                    resultVideo.style.display = "none";
+                } else if (data.result_video) {
+                    const videoSource = "data:video/mp4;base64," + data.result_video[0];
+                    videoPlayer.src = videoSource;
+                    resultVideo.style.display = "block";
+                    resultImage.style.display = "none";
+                } else {
+                    throw new Error("서버에서 결과를 받지 못했습니다.");
+                }
+            } catch (error) {
+                console.error("오류 발생:", error);
+                alert("파일 분석 중 오류가 발생했습니다: " + error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        // 파일 입력 변경 시 유효성 검사
+        document.getElementById('file-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.size > 100 * 1024 * 1024) {
+                alert("파일 크기는 100MB를 초과할 수 없습니다.");
+                event.target.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

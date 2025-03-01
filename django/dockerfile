@@ -1,0 +1,27 @@
+FROM python:3.8
+
+ENV PYTHONUNBUFFERED 1
+
+# 필요한 시스템 패키지 설치 (OpenCV 및 기타 의존성)
+RUN apt-get -y update && apt-get install -y --no-install-recommends \
+    vim \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxrender1 \
+    libxext6 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /code
+WORKDIR /code
+COPY . /code/
+
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# 정적 파일 및 미디어 디렉토리 생성
+RUN mkdir -p /code/static /code/media
+
+EXPOSE 8000
+# CMD는 제거하고 docker-compose에서 command를 사용

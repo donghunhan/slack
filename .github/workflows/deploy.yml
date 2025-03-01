@@ -1,0 +1,29 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [dev] # main 브랜치에 push할 때 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/slack-dev
+            git pull
+            cd django
+            docker-compose down
+            docker-compose up --build -d
+            # 필요한 경우 마이그레이션 실행
+            docker-compose exec -T web python manage.py migrate
+            # 정적 파일 수집
+            docker-compose exec -T web python manage.py collectstatic --noinput
